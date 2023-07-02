@@ -6,6 +6,8 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET 4
+#define NUM_SERVOS 5
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 Servo servos[5];
@@ -18,13 +20,7 @@ const int maxPotValues[5] = {840, 615, 870, 400, 1023};  // Maximum potentiomete
 const int minAngles[5] = {0, 250, 150, 0, 170};  // Minimum servo angles
 const int maxAngles[5] = {120, 100, 90, 100, 90};  // Maximum servo angles
 
-int servo1[100];
-int servo2[100];
-int servo3[100];
-int servo4[100];
-int servo5[100];
-
-
+int servotrack[NUM_SERVOS][100];
 
 enum SystemState {
   IDLE,
@@ -67,24 +63,24 @@ void loop() {
   // Check the state of the buttons and set the current state accordingly
   else if (digitalRead(recordingButtonPin) == LOW) {
     currentState = RECORDING;
-    for(int i =0; i < 180; i++){
-      servo1[0] = map(analogRead(A0), minPotValues[i], maxPotValues[i], minAngles[i], maxAngles[i]);
-      servo2[0] = map(analogRead(A1), minPotValues[i], maxPotValues[i], minAngles[i], maxAngles[i]);
-      servo3[0] = map(analogRead(A2), minPotValues[i], maxPotValues[i], minAngles[i], maxAngles[i]);
-      servo4[0] = map(analogRead(A3), minPotValues[i], maxPotValues[i], minAngles[i], maxAngles[i]);
-      servo5[0] = map(analogRead(A5), minPotValues[i], maxPotValues[i], minAngles[i], maxAngles[i]);
-    
-  delay(500);
+    for(int i =0; i < 100; i++){
+       for (int j=0;j<5;j++)
+       {
+        servotrack[j][i] = map(analogRead( potPins[j]), minPotValues[j], maxPotValues[j], minAngles[j],  maxAngles[j]);
+        }
+      delay(500);
     } 
+ 
+
   } else if (digitalRead(playbackButtonPin) == LOW) {
     currentState = PLAYBACK;
-    for(int i =0; i < 180; i++){
-      digitalWrite(2,servo1);
-      digitalWrite(3,servo2);
-      digitalWrite(4,servo3);
-      digitalWrite(5,servo4);
-      digitalWrite(6,servo5);
-
+    for(int i =0; i < 100; i++){
+       for (int j=0;j<5;j++)
+       {
+        servos[j].write( servotrack[j][i] );
+        }
+      delay(500);
+    }
 
   } 
 
@@ -102,4 +98,4 @@ void loop() {
   display.display();
   delay(20);
 }
-}
+
