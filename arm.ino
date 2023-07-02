@@ -12,7 +12,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 Servo servos[5];
 const int servoPins[5] = {2, 3, 4, 5, 6}; // Digital pins for servos
-const int potPins[5] = {A0, A1, A2, A3, A5};
+const int potPins[5] = {A0, A1, A2, A3, A6};
 const int recordingButtonPin = 10; // Button pin for recording
 const int playbackButtonPin = 11;  // Button pin for playback
 const int minPotValues[5] = {430, 30, 140, 1023, 0};    // Minimum potentiometer values for each servo
@@ -59,29 +59,29 @@ void loop() {
   }
   if ((digitalRead(playbackButtonPin) == HIGH) && (digitalRead(recordingButtonPin) == HIGH)){
     currentState = IDLE;
+  
   }
   // Check the state of the buttons and set the current state accordingly
-  else if (digitalRead(recordingButtonPin) == LOW) {
+  if (digitalRead(recordingButtonPin) == LOW && digitalRead(playbackButtonPin) == HIGH) {
     currentState = RECORDING;
     for(int i =0; i < 100; i++){
        for (int j=0;j<5;j++)
        {
         servotrack[j][i] = map(analogRead( potPins[j]), minPotValues[j], maxPotValues[j], minAngles[j],  maxAngles[j]);
         }
-      delay(500);
+      delay(10);
     } 
- 
-
-  } else if (digitalRead(playbackButtonPin) == LOW) {
+  } 
+  
+  if (digitalRead(playbackButtonPin) == LOW && digitalRead(recordingButtonPin) == HIGH) {
     currentState = PLAYBACK;
     for(int i =0; i < 100; i++){
        for (int j=0;j<5;j++)
        {
         servos[j].write( servotrack[j][i] );
         }
-      delay(500);
+      delay(10);
     }
-
   } 
 
   // Display the corresponding letter based on the current state
